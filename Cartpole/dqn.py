@@ -28,7 +28,7 @@ import PIL.Image
 #     Hyperparameters     #
 ###########################
 
-num_iterations = 20000 # @param {type:"integer"}
+num_iterations = 8000 # @param {type:"integer"}
 
 initial_collect_steps = 100  # @param {type:"integer"} 
 collect_steps_per_iteration = 1  # @param {type:"integer"}
@@ -39,34 +39,20 @@ learning_rate = 1e-3  # @param {type:"number"}
 log_interval = 200  # @param {type:"integer"}
 
 num_eval_episodes = 10  # @param {type:"integer"}
-eval_interval = 1000  # @param {type:"integer"}
+eval_interval = 10  # @param {type:"integer"}
 
 
 
 
 
-#env_name = 'CartPole-v0'
-env_name = 'Acrobot-v1'
+env_name = 'CartPole-v0'
 env = suite_gym.load(env_name)
-
 env.reset()
-#PIL.Image.fromarray(env.render())
 
-print('Observation Spec:')
-print(env.time_step_spec().observation)
 
-print('Reward Spec:')
-print(env.time_step_spec().reward)
 
-print('Action Spec:')
-print(env.action_spec())
-
-train_py_env = suite_gym.load(env_name)
-eval_py_env = suite_gym.load(env_name)
-
-train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-
+train_env = tf_py_environment.TFPyEnvironment(suite_gym.load(env_name))
+eval_env = tf_py_environment.TFPyEnvironment(suite_gym.load(env_name))
 
 
 #####################
@@ -170,14 +156,10 @@ def collect_data(env, policy, buffer, steps):
 
 collect_data(train_env, random_policy, replay_buffer, initial_collect_steps)
 
-# This loop is so common in RL, that we provide standard implementations. 
-# For more details see tutorial 4 or the drivers module.
-# https://github.com/tensorflow/agents/blob/master/docs/tutorials/4_drivers_tutorial.ipynb 
-# https://www.tensorflow.org/agents/api_docs/python/tf_agents/drivers
 
 
 
-# Dataset generates trajectories with shape [Bx2x...]
+
 dataset = replay_buffer.as_dataset(
     num_parallel_calls=3, 
     sample_batch_size=batch_size, 
@@ -191,7 +173,7 @@ print(iterator)
 
 
 
-# (Optional) Optimize by wrapping some of the code in a graph using TF function.
+
 agent.train = common.function(agent.train)
 
 # Reset the train step
@@ -241,7 +223,6 @@ def create_policy_eval_video(policy, filename, num_episodes=5, fps=30):
         action_step = policy.action(time_step)
         time_step = eval_env.step(action_step.action)
         video.append_data(eval_py_env.render())
-  return embed_mp4(filename)
 
 
 
