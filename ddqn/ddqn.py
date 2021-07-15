@@ -86,7 +86,7 @@ class Example_Buffer(object):
         
         self.episode_indexes = episode_indexes
         
-        self.num_episodes = len(self.episode_indexes)
+        self.num_episodes = len(self.episode_choice)
         
         
 
@@ -113,6 +113,7 @@ class Example_Buffer(object):
 
         self.num_examples = len(self.action_memory)
         self.mem_counter = 0
+        self.episode_counter = 0
 
         
 
@@ -127,6 +128,25 @@ class Example_Buffer(object):
         self.mem_counter += 1
 
         return states, actions, rewards, states_, terminal
+
+    def example_reset(self):
+        return self.state_memory[self.mem_counter]
+
+    def example_step(self):
+        actions = self.action_memory[self.mem_counter]
+        states_ = self.next_state_memory[self.mem_counter]
+        rewards = self.reward_memory[self.mem_counter]
+        terminal = self.terminal_memory[self.mem_counter]
+        #print(self.mem_counter)
+
+        self.mem_counter += 1
+        if terminal == 0:
+            self.episode_counter += 1
+
+        return actions, states_, rewards, terminal, {}
+
+    
+
         
 
 
@@ -161,7 +181,7 @@ class DDQNAgent(object):
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions,discrete=True)
         self.use_examples = use_examples
         if self.use_examples:
-            self.example_memory = Example_Buffer(discrete=True, episode_choice=[39])
+            self.example_memory = Example_Buffer(discrete=True, episode_choice=[39,51,54,61,62,71,88])
         self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
         self.q_eval.summary()
         self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
@@ -209,7 +229,7 @@ class DDQNAgent(object):
             if self.memory.mem_counter % self.replace_target == 0:
                 self.update_network_parameters()
 
-        #def learn_from_example(self):
+        
 
     def update_network_parameters(self):
         for i in range(len(self.q_target.layers)):

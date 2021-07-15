@@ -52,7 +52,7 @@ if __name__ == '__main__':
     env = gym.make('CartPole-v0')
     ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=2, epsilon=1,
                   batch_size=64, input_dims=4, use_examples=True)
-    n_games = 10
+    n_games = 100
     #ddqn_agent.load_model()
     ddqn_scores = []
     eps_history = []
@@ -62,11 +62,21 @@ if __name__ == '__main__':
     for i in range(n_games):
         done = False
         score = 0
-        if ddqn_agent.use_examples and ddqn_agent.example_memory.num_examples > ddqn_agent.example_memory.mem_counter:
-            observation = ddqn_agent.example_memory.sample_example()
+        if ddqn_agent.use_examples and ddqn_agent.example_memory.num_episodes > ddqn_agent.example_memory.episode_counter-1:
+            print("Example Game")
+            print(ddqn_agent.example_memory.num_examples)
+            observation = ddqn_agent.example_memory.example_reset()
+
             while not done:
-                
+                action, observation_, reward, xdone, info = ddqn_agent.example_memory.example_step()
+                done = not xdone
+                #print(ddqn_agent.example_memory.example_step())
+                score+=reward
+                ddqn_agent.remember(observation, action, reward, observation_, int(done))
+                observation = observation_
+                ddqn_agent.learn()
         else:
+            print("Real Game")
             observation = env.reset()
             while not done:
                 action = ddqn_agent.choose_action(observation)
