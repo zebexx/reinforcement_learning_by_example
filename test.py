@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-test_array = np.genfromtxt("history/action_history.csv", delimiter=",")
+test_array = np.genfromtxt("example_data/action_history.csv", delimiter=",")
 print(len(test_array))
 
 

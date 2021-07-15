@@ -12,8 +12,8 @@ class ReplayBuffer(object):
         self.discrete = discrete
         self.state_memory = np.empty((self.mem_size, input_shape))
         self.next_state_memory = np.empty((self.mem_size, input_shape))
-        dtype = np.int8 if self.discrete else np.float32
-        self.action_memory = np.empty((self.mem_size, n_actions), dtype=dtype)
+        self.dtype = np.int8 if self.discrete else np.float32
+        self.action_memory = np.empty((self.mem_size, n_actions), dtype=self.dtype)
         self.reward_memory = np.empty(self.mem_size)
         self.terminal_memory = np.empty(self.mem_size, dtype=np.float32)
 
@@ -46,35 +46,88 @@ class ReplayBuffer(object):
     
     def save_memory(self):
         #self.state_memory = self.state_memory[:self.mem_counter]
-        np.savetxt("history/state_history.csv", self.state_memory, delimiter=",")
+        np.savetxt("history/state_history.csv", self.state_memory[:self.mem_counter], delimiter=",")
 
         #self.action_memory = self.action_memory[:self.mem_counter]
-        np.savetxt("history/action_history.csv", self.action_memory, delimiter=",")
+        np.savetxt("history/action_history.csv", self.action_memory[:self.mem_counter], delimiter=",")
 
         #self.reward_memory = self.reward_memory[:self.mem_counter]
-        np.savetxt("history/reward_history.csv", self.reward_memory, delimiter=",")
+        np.savetxt("history/reward_history.csv", self.reward_memory[:self.mem_counter], delimiter=",")
 
         #self.next_state_memory = self.next_state_memory[:self.mem_counter]
-        np.savetxt("history/next_state_history.csv", self.next_state_memory, delimiter=",")
+        np.savetxt("history/next_state_history.csv", self.next_state_memory[:self.mem_counter], delimiter=",")
 
         #self.terminal_memory = self.terminal_memory[:self.mem_counter]
-        np.savetxt("history/terminal_history.csv", self.terminal_memory, delimiter=",")
+        np.savetxt("history/terminal_history.csv", self.terminal_memory[:self.mem_counter], delimiter=",")
 
         
 
-    def load_example_history(self):
-        self.state_memory = np.genfromtxt("history/state_history.csv", delimiter=",")
-        self.action_memory = np.genfromtxt("history/action_history.csv", delimiter=",")
-        self.reward_memory = np.genfromtxt("history/reward_history.csv", delimiter=",")
-        self.next_state_memory = np.genfromtxt("history/next_state_history.csv", delimiter=",")
-        self.terminal_memory = np.genfromtxt("history/terminal_history.csv", delimiter=",")
+    
+class Example_Buffer(object):
+    def __init__(self, episode_choice=None, discrete=False):
+        self.episode_choice = episode_choice
+        self.discrete = discrete
+        self.dtype = np.int8 if self.discrete else np.float32
+
+        self.state_memory = np.genfromtxt("example_data/state_history.csv", delimiter=",")
+        self.action_memory = np.genfromtxt("example_data/action_history.csv", delimiter=",", dtype=self.dtype)
+        self.reward_memory = np.genfromtxt("example_data/reward_history.csv", delimiter=",")
+        self.next_state_memory = np.genfromtxt("example_data/next_state_history.csv", delimiter=",")
+        self.terminal_memory = np.genfromtxt("example_data/terminal_history.csv", delimiter=",", dtype=np.float32)
+
         
-        index = 0
-        for x in self.action_memory:
-            if x[0] == 0 and x[1] == 0:
-                self.mem_counter=index
-                break
-            index += 1
+        
+        episode_indexes = []
+        
+        for i in range(len(self.terminal_memory)):
+            if self.terminal_memory[i] == 0 and i != len(self.terminal_memory)-1:
+                episode_indexes.append(i+1)
+            
+        
+        self.episode_indexes = episode_indexes
+        
+        self.num_episodes = len(self.episode_indexes)
+        
+        
+
+        if self.episode_choice != None:
+            episode_state_memory = np.split(self.state_memory, self.episode_indexes)
+            episode_action_memory = np.split(self.action_memory, self.episode_indexes)
+            episode_reward_memory= np.split(self.reward_memory, self.episode_indexes)
+            episode_next_state_memory= np.split(self.next_state_memory, self.episode_indexes)
+            episode_terminal_memory = np.split(self.terminal_memory, self.episode_indexes)
+
+            new_state_memory = np.array(episode_state_memory[self.episode_choice[0]])
+            new_action_memory = np.array(episode_action_memory[self.episode_choice[0]])
+            new_reward_memory = np.array(episode_reward_memory[self.episode_choice[0]])
+            new_next_state_memory = np.array(episode_next_state_memory[self.episode_choice[0]])
+            new_terminal_memory = np.array(episode_terminal_memory[self.episode_choice[0]])
+            
+            
+            for i in range(len(self.episode_choice)-1):
+                self.state_memory = np.concatenate((new_state_memory, episode_state_memory[i+1]))
+                self.action_memory = np.concatenate((new_action_memory, episode_action_memory[i+1]))
+                self.reward_memory = np.concatenate((new_reward_memory, episode_reward_memory[i+1]))
+                self.next_state_memory = np.concatenate((new_next_state_memory, episode_next_state_memory[i+1]))
+                self.terminal_memory = np.concatenate((new_terminal_memory, episode_terminal_memory[i+1]))
+
+        self.num_examples = len(self.action_memory)
+        self.mem_counter = 0
+
+        
+
+    def sample_example(self):
+
+        states = self.state_memory[self.mem_counter]
+        actions = self.action_memory[self.mem_counter]
+        rewards = self.reward_memory[self.mem_counter]
+        states_ = self.next_state_memory[self.mem_counter]
+        terminal = self.terminal_memory[self.mem_counter]
+
+        self.mem_counter += 1
+
+        return states, actions, rewards, states_, terminal
+        
 
 
 
@@ -92,11 +145,10 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
     return model
 
 
-
 class DDQNAgent(object):
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
                  input_dims, epsilon_dec=0.996,  epsilon_end=0.01,
-                 mem_size=1000000, fname='ddqn_model.h5', replace_target=100):
+                 mem_size=1000000, fname='ddqn_model.h5', replace_target=100, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
         self.gamma = gamma
@@ -106,8 +158,10 @@ class DDQNAgent(object):
         self.batch_size = batch_size
         self.model_file = fname
         self.replace_target = replace_target
-        self.memory = ReplayBuffer(mem_size, input_dims, n_actions,
-                                   discrete=True)
+        self.memory = ReplayBuffer(mem_size, input_dims, n_actions,discrete=True)
+        self.use_examples = use_examples
+        if self.use_examples:
+            self.example_memory = Example_Buffer(discrete=True, episode_choice=[39])
         self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
         self.q_eval.summary()
         self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
@@ -155,6 +209,8 @@ class DDQNAgent(object):
             if self.memory.mem_counter % self.replace_target == 0:
                 self.update_network_parameters()
 
+        #def learn_from_example(self):
+
     def update_network_parameters(self):
         for i in range(len(self.q_target.layers)):
             self.q_target.get_layer(index=i).set_weights(self.q_eval.get_layer(index=i).get_weights())
@@ -165,7 +221,5 @@ class DDQNAgent(object):
 
     def load_model(self):
         self.q_eval = load_model(self.model_file)
-        # if we are in evaluation mode we want to use the best weights for
-        # q_target
         if self.epsilon == 0.0:
             self.update_network_parameters()

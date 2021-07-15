@@ -51,25 +51,30 @@ def plotLearning(x, scores, epsilons, filename, lines=None):
 if __name__ == '__main__':
     env = gym.make('CartPole-v0')
     ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=2, epsilon=1,
-                  batch_size=64, input_dims=4)
+                  batch_size=64, input_dims=4, use_examples=True)
     n_games = 10
-    ddqn_agent.load_model()
+    #ddqn_agent.load_model()
     ddqn_scores = []
     eps_history = []
     #env = wrappers.Monitor(env, "tmp/lunar-lander-ddqn-2",
     #                         video_callable=lambda episode_id: True, force=True)
-
+    
     for i in range(n_games):
         done = False
         score = 0
-        observation = env.reset()
-        while not done:
-            action = ddqn_agent.choose_action(observation)
-            observation_, reward, done, info = env.step(action)
-            score += reward
-            ddqn_agent.remember(observation, action, reward, observation_, int(done))
-            observation = observation_
-            ddqn_agent.learn()
+        if ddqn_agent.use_examples and ddqn_agent.example_memory.num_examples > ddqn_agent.example_memory.mem_counter:
+            observation = ddqn_agent.example_memory.sample_example()
+            while not done:
+                
+        else:
+            observation = env.reset()
+            while not done:
+                action = ddqn_agent.choose_action(observation)
+                observation_, reward, done, info = env.step(action)
+                score += reward
+                ddqn_agent.remember(observation, action, reward, observation_, int(done))
+                observation = observation_
+                ddqn_agent.learn()
         eps_history.append(ddqn_agent.epsilon)
 
         ddqn_scores.append(score)
