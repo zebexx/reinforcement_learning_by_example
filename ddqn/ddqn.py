@@ -103,8 +103,9 @@ class Example_Buffer(object):
             new_next_state_memory = np.array(episode_next_state_memory[self.episode_choice[0]])
             new_terminal_memory = np.array(episode_terminal_memory[self.episode_choice[0]])
             
-            
-            for i in range(len(self.episode_choice)-1):
+            print(len(self.episode_choice))
+            for i in range(len(self.episode_choice)):
+                print(i)
                 self.state_memory = np.concatenate((new_state_memory, episode_state_memory[i+1]))
                 self.action_memory = np.concatenate((new_action_memory, episode_action_memory[i+1]))
                 self.reward_memory = np.concatenate((new_reward_memory, episode_reward_memory[i+1]))
@@ -114,6 +115,19 @@ class Example_Buffer(object):
         self.num_examples = len(self.action_memory)
         self.mem_counter = 0
         self.episode_counter = 0
+
+        episode_indexes1 = []
+
+        for i in range(len(self.terminal_memory)):
+            if self.terminal_memory[i] == 0 and i != len(self.terminal_memory)-1:
+                episode_indexes1.append(i+1)
+            
+        
+        self.episode_indexes = episode_indexes1
+
+        print(self.terminal_memory)
+        print(len(self.terminal_memory))
+        print(self.episode_indexes)
 
         
 
@@ -141,13 +155,12 @@ class Example_Buffer(object):
 
         self.mem_counter += 1
         if terminal == 0:
+            print("done")
             self.episode_counter += 1
 
         return actions, states_, rewards, terminal, {}
 
-    
-
-        
+            
 
 
 

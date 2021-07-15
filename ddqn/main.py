@@ -62,9 +62,11 @@ if __name__ == '__main__':
     for i in range(n_games):
         done = False
         score = 0
-        if ddqn_agent.use_examples and ddqn_agent.example_memory.num_episodes > ddqn_agent.example_memory.episode_counter-1:
+        if ddqn_agent.use_examples and ddqn_agent.example_memory.num_episodes > ddqn_agent.example_memory.episode_counter:
             print("Example Game")
-            print(ddqn_agent.example_memory.num_examples)
+            print(ddqn_agent.example_memory.num_episodes)
+            print(ddqn_agent.example_memory.episode_counter)
+            #print(ddqn_agent.example_memory.num_examples)
             observation = ddqn_agent.example_memory.example_reset()
 
             while not done:
