@@ -20,7 +20,7 @@ def plotLearning(x, scores, epsilons, filename, lines=None):
     ax2=fig.add_subplot(111, label="2", frame_on=False)
 
     ax.plot(x, epsilons, color="C0", linewidth=0.5)
-    ax.set_xlabel("Episode", color="C0")
+    ax.set_xlabel("Timesteps", color="C0")
     ax.set_ylabel("Epsilon", color="C0")
     ax.tick_params(axis='x', colors="C0")
     ax.tick_params(axis='y', colors="C0")
@@ -30,7 +30,7 @@ def plotLearning(x, scores, epsilons, filename, lines=None):
     for t in range(N):
 	    running_avg[t] = np.mean(scores[max(0, t-20):(t+1)])
 
-    ax2.scatter(x, running_avg, color="C1", linewidths=1)
+    ax2.plot(x, running_avg, color="C1", linewidth=1)
     #ax2.xaxis.tick_top()
     ax2.axes.get_xaxis().set_visible(False)
     ax2.yaxis.tick_right()
@@ -48,55 +48,72 @@ def plotLearning(x, scores, epsilons, filename, lines=None):
     plt.savefig(filename)
 
 
+def isLast(agent, index):
+    return agent.memory.terminal_memory[index] == 0
+
+def episode_reward(agent):
+    episode_reward = 0
+
+    while not isLast(agent, agent.memory.mem_counter):
+        episode_reward += agent.memory.reward_memory[agent.memory.mem_counter]
+
+
 if __name__ == '__main__':
     env = gym.make('CartPole-v0')
     #env = gym.make('MountainCar-v0')
     #env = gym.make('Acrobot-v1')
-    env = gym.make('LunarLander-v2')
+    #env = gym.make('LunarLander-v2')
     #print(envs.registry.all())
     
     ddqn_agent = DDQNAgent(alpha=0.00025, gamma=0.99, n_actions=2, epsilon=1,
                   batch_size=32, input_dims=4, use_examples=False)
-    num_episodes = 200
+    timeSteps = 100
     #ddqn_agent.load_model()
     ddqn_scores = []
+    episode_timestep = []
     eps_history = []
     #env = wrappers.Monitor(env, "tmp/lunar-lander-ddqn-2",
     #                         video_callable=lambda episode_id: True, force=True)
-    
-    for i in range(num_episodes):
-        
+    score = 0
+    for i in range(timeSteps):
         done = False
-        score = 0
+
         if ddqn_agent.use_examples and ddqn_agent.example_memory.num_episodes > ddqn_agent.example_memory.episode_counter:
             print("Example Game")
             print("| Num Episodes: {} || Num_Examples: {} || Current Episode: {} |".format(ddqn_agent.example_memory.num_episodes, ddqn_agent.example_memory.num_examples, ddqn_agent.example_memory.episode_counter) )
             
             observation = ddqn_agent.example_memory.example_reset()
 
-            while not done:
-                action, observation_, reward, xdone, info = ddqn_agent.example_memory.example_step()
-                done = not xdone
-                #print(ddqn_agent.example_memory.example_step())
-                score+=reward
-                ddqn_agent.remember(observation, action, reward, observation_, int(done))
-                observation = observation_
-                ddqn_agent.learn()
+            
+            action, observation_, reward, xdone, info = ddqn_agent.example_memory.example_step()
+            done = not xdone
+            #print(ddqn_agent.example_memory.example_step())
+            score+=reward
+            ddqn_agent.remember(observation, action, reward, observation_, int(done))
+            observation = observation_
+            ddqn_agent.learn()
         else:
-            print("Real Game")
+            #print("Real Game")
             observation = env.reset()
-            while not done:
-                #print(ddqn_agent.memory.mem_counter)
-                #env.render()
-                action = ddqn_agent.choose_action(observation)
-                observation_, reward, done, info = env.step(action)
-                score += reward
-                ddqn_agent.remember(observation, action, reward, observation_, int(done))
-                observation = observation_
-                ddqn_agent.learn()
-        eps_history.append(ddqn_agent.epsilon)
+            
+            #print(ddqn_agent.memory.mem_counter)
+            #env.render()
+            action = ddqn_agent.choose_action(observation)
+            observation_, reward, done, info = env.step(action)
+            score += reward
+            ddqn_agent.remember(observation, action, reward, observation_, int(done))
+            observation = observation_
+            ddqn_agent.learn()
+        
 
-        ddqn_scores.append(score)
+        
+
+        if done: 
+            ddqn_scores.append(score)
+            eps_history.append(ddqn_agent.epsilon)
+            episode_timestep.append(i+1)
+
+            score = 0
 
         avg_score = np.mean(ddqn_scores[max(0, i-100):(i+1)])
         running_avg_score = np.mean(ddqn_scores[max(0, i-20):(i+1)])
@@ -108,5 +125,8 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
     filename = 'LunarLander_ddqn_200ep_7-200_bs-32_bu-4_lr-0.00025_g-0.99_ledr-0.0001.png'
 
-    x = [i+1 for i in range(num_episodes)]
-    plotLearning(x, ddqn_scores, eps_history, filename)
+    x = [i+1 for i in range(timeSteps)]
+
+    print(episode_timestep)
+    print(ddqn_scores)
+    plotLearning(episode_timestep, ddqn_scores, eps_history, filename)
