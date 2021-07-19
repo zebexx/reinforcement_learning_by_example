@@ -97,20 +97,12 @@ class Example_Buffer(object):
             episode_next_state_memory= np.split(self.next_state_memory, self.episode_indexes)
             episode_terminal_memory = np.split(self.terminal_memory, self.episode_indexes)
 
-            new_state_memory = np.array(episode_state_memory[self.episode_choice[0]])
-            new_action_memory = np.array(episode_action_memory[self.episode_choice[0]])
-            new_reward_memory = np.array(episode_reward_memory[self.episode_choice[0]])
-            new_next_state_memory = np.array(episode_next_state_memory[self.episode_choice[0]])
-            new_terminal_memory = np.array(episode_terminal_memory[self.episode_choice[0]])
-            
-            print(len(self.episode_choice))
-            for i in range(len(self.episode_choice)):
-                print(i)
-                self.state_memory = np.concatenate((new_state_memory, episode_state_memory[i+1]))
-                self.action_memory = np.concatenate((new_action_memory, episode_action_memory[i+1]))
-                self.reward_memory = np.concatenate((new_reward_memory, episode_reward_memory[i+1]))
-                self.next_state_memory = np.concatenate((new_next_state_memory, episode_next_state_memory[i+1]))
-                self.terminal_memory = np.concatenate((new_terminal_memory, episode_terminal_memory[i+1]))
+            self.state_memory = np.concatenate([episode_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+            self.action_memory = np.concatenate([episode_action_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+            self.reward_memory = np.concatenate([episode_reward_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+            self.state_memory = np.concatenate([episode_next_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+            self.terminal_memory = np.concatenate([episode_terminal_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+
 
         self.num_examples = len(self.action_memory)
         self.mem_counter = 0
@@ -125,9 +117,7 @@ class Example_Buffer(object):
         
         self.episode_indexes = episode_indexes1
 
-        print(self.terminal_memory)
-        print(len(self.terminal_memory))
-        print(self.episode_indexes)
+        
 
         
 
@@ -155,7 +145,7 @@ class Example_Buffer(object):
 
         self.mem_counter += 1
         if terminal == 0:
-            print("done")
+            #print("done")
             self.episode_counter += 1
 
         return actions, states_, rewards, terminal, {}
@@ -180,7 +170,7 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 
 class DDQNAgent(object):
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, epsilon_dec=0.996,  epsilon_end=0.01,
+                 input_dims, epsilon_dec=0.0001,  epsilon_end=0.1,
                  mem_size=1000000, fname='ddqn_model.h5', replace_target=100, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
@@ -211,11 +201,13 @@ class DDQNAgent(object):
         else:
             actions = self.q_eval.predict(state)
             action = np.argmax(actions)
-
+        #if else for example data
+        #function to choose similar states
         return action
 
     def learn(self):
-        if self.memory.mem_counter > self.batch_size:
+        learning_counter = 0
+        if self.memory.mem_counter > self.batch_size and learning_counter % 4 == 0:
             state, action, reward, new_state, done = \
                                           self.memory.sample_buffer(self.batch_size)
 
@@ -237,7 +229,7 @@ class DDQNAgent(object):
 
             _ = self.q_eval.fit(state, q_target, verbose=0)
 
-            self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > \
+            self.epsilon = self.epsilon - self.epsilon_dec if self.epsilon > \
                            self.epsilon_min else self.epsilon_min
             if self.memory.mem_counter % self.replace_target == 0:
                 self.update_network_parameters()

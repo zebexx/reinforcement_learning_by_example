@@ -1,16 +1,11 @@
 import numpy as np
+import tensorflow as tf
+import gym
+
+tf.config.list_physical_devices('GPU')
+
+
+env = gym.make('LunarLander-v2')
 
 
 
-
-test_array = np.genfromtxt("example_data/action_history.csv", delimiter=",")
-print(len(test_array))
-
-
-index = 0
-for x in test_array:
-    if x[0] == 0 and x[1] == 0:
-        print(x)
-        print(index)
-        break
-    index += 1

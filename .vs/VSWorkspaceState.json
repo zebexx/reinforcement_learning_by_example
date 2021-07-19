@@ -1,6 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\ddqn"
   ],
+  "SelectedNode": "\\ddqn\\ddqn.py",
   "PreviewInSolutionExplorer": false
 }
