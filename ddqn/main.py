@@ -98,7 +98,7 @@ if __name__ == '__main__':
         for i in range(timeSteps):
             
 
-            if agent[0].use_examples and agent[0].example_memory.num_episodes >= agent[0].example_memory.episode_counter:
+            if agent[0].use_examples and agent[0].example_memory.num_episodes >= agent[0].example_memory.episode_counter and agent[0].epsilon <= 0.1:
                 
                 
                 if done:
