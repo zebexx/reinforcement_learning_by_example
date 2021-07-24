@@ -9,72 +9,44 @@ from gym import envs
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from utils import plot
 
 from tf_agents.environments import suite_gym
 
 from ddqn import DDQNAgent
 
 
-def plotLearning(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, lines=None):
-    fig=plt.figure()
-    ax=fig.add_subplot(111, label="1")
-    ax2=fig.add_subplot(111, label="2", frame_on=False)
 
-    ax.plot(x, epsilons, color="m", linewidth=0.5)
-    #ax.plot(x1, example_epsilsons, color="C2", linewidth=0.5)
-    
-    
-    ax.set_xlabel("Timesteps", color="C0")
-    ax.set_ylabel("Epsilon", color="C0")
-    ax.tick_params(axis='x', colors="C0")
-    ax.tick_params(axis='y', colors="C0")
 
-    N = len(scores)
-    running_avg = np.empty(N)
-    for t in range(N):
-	    running_avg[t] = np.mean(scores[max(0, t-10):(t+1)])
 
-    N = len(example_scores)
-    example_running_avg = np.empty(N)
-    for t in range(N):
-	    example_running_avg[t] = np.mean(example_scores[max(0, t-10):(t+1)])
-
-    ax2.plot(x, running_avg, color="r", label="Normal")
-    ax2.plot(x, scores, color="lightcoral", linewidth=0.5)
-    ax2.plot(x1, example_running_avg, color="b", label="Example")
-    ax2.plot(x1, example_scores, color="cornflowerblue", linewidth=0.5)
-    ax2.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01), ncol=2,
-            borderaxespad=0, frameon=False, fontsize='x-small')
-
-    ax2.axes.get_xaxis().set_visible(False)
-    ax2.yaxis.tick_right()
-    ax2.set_ylabel('Score', color="C1")
-    ax2.yaxis.set_label_position('right')
-    ax2.tick_params(axis='y', colors="C1")
-
-    if lines is not None:
-        for line in lines:
-            plt.axvline(x=line)
-
-    plt.savefig(filename)
 
 if __name__ == '__main__':
+
+    ### HYPERPARAMETERS ###
+    alpha = 0.00025
+    gamma = 0.99
+
+    epsilon_start = 1
+    epsilon_end = 0.001
+    epsilon_discount_rate = 0.999
+
+    replace_target = 500
+
+    memory_size = 1000000
+    batch_size = 32
+
+    timeSteps = 100000
+
     env = gym.make('CartPole-v1')
     
     
-    ddqn_agent = DDQNAgent(alpha=0.00025, gamma=0.99, n_actions=2, epsilon=1, batch_size=32, input_dims=4, use_examples=False)
+    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=epsilon_start, batch_size=batch_size, input_dims=4, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
 
-    ddqn_agent_example = DDQNAgent(alpha=0.00025, gamma=0.99, n_actions=2, epsilon=1, batch_size=32, input_dims=4, use_examples=True, example_location="example_data/CartPole-v1")
+    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=1, batch_size=batch_size, input_dims=4, use_examples=True, example_location="example_data/CartPole-v1", epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
 
-
-    
-
-    timeSteps = 200000
-    
     ddqn_scores = []
     episode_timestep = []
     eps_history = []
-
 
     example_ddqn_scores = []
     example_episode_timestep = []
@@ -123,9 +95,6 @@ if __name__ == '__main__':
                 observation = observation_
                 agent[0].learn()
             
-
-            
-
             if done: 
                 agent[1].append(score)
                 agent[2].append(i+1)
@@ -155,4 +124,4 @@ if __name__ == '__main__':
     
     
     
-    plotLearning(episode_timestep, ddqn_scores, eps_history, example_episode_timestep, example_ddqn_scores, example_eps_history, filename)
+    plot(episode_timestep, ddqn_scores, eps_history, example_episode_timestep, example_ddqn_scores, example_eps_history, filename)
