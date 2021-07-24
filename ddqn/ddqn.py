@@ -45,19 +45,11 @@ class ReplayBuffer(object):
         return states, actions, rewards, states_, terminal
     
     def save_memory(self):
-        #self.state_memory = self.state_memory[:self.mem_counter]
+        
         np.savetxt("history/state_history.csv", self.state_memory[:self.mem_counter], delimiter=",")
-
-        #self.action_memory = self.action_memory[:self.mem_counter]
         np.savetxt("history/action_history.csv", self.action_memory[:self.mem_counter], delimiter=",")
-
-        #self.reward_memory = self.reward_memory[:self.mem_counter]
         np.savetxt("history/reward_history.csv", self.reward_memory[:self.mem_counter], delimiter=",")
-
-        #self.next_state_memory = self.next_state_memory[:self.mem_counter]
         np.savetxt("history/next_state_history.csv", self.next_state_memory[:self.mem_counter], delimiter=",")
-
-        #self.terminal_memory = self.terminal_memory[:self.mem_counter]
         np.savetxt("history/terminal_history.csv", self.terminal_memory[:self.mem_counter], delimiter=",")
 
         
@@ -177,8 +169,8 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 
 class DDQNAgent(object):
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, example_location=None, epsilon_dec=0.9999,  epsilon_end=0.1,
-                 mem_size=1000000, fname='ddqn_model.h5', replace_target=1000, use_examples=False):
+                 input_dims, example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
+                 mem_size=1000000, fname='ddqn_model.h5', replace_target=500, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
         self.gamma = gamma

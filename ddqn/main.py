@@ -40,7 +40,9 @@ def plotLearning(x, scores, epsilons, x1, example_scores, example_epsilsons, fil
 	    example_running_avg[t] = np.mean(example_scores[max(0, t-10):(t+1)])
 
     ax2.plot(x, running_avg, color="r", label="Normal")
+    ax2.plot(x, scores, color="lightcoral", linewidth=0.5)
     ax2.plot(x1, example_running_avg, color="b", label="Example")
+    ax2.plot(x1, example_scores, color="cornflowerblue", linewidth=0.5)
     ax2.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01), ncol=2,
             borderaxespad=0, frameon=False, fontsize='x-small')
 
@@ -73,7 +75,7 @@ if __name__ == '__main__':
 
     
 
-    timeSteps = 100000
+    timeSteps = 200000
     
     ddqn_scores = []
     episode_timestep = []
@@ -98,8 +100,10 @@ if __name__ == '__main__':
         for i in range(timeSteps):
             
 
-            if agent[0].use_examples and agent[0].example_memory.num_episodes >= agent[0].example_memory.episode_counter and agent[0].epsilon <= 0.1:
+            if agent[0].use_examples and agent[0].example_memory.mem_counter+1 <= agent[0].example_memory.num_examples and agent[0].epsilon <= 0.1 :
                 
+                if agent[0].example_memory.mem_counter == 0:
+                    score =0
                 
                 if done:
                     observation = agent[0].example_memory.example_reset()
@@ -136,9 +140,8 @@ if __name__ == '__main__':
 
                 avg_score = np.mean(agent[1][max(0, len(agent[1])-100):(len(agent[1])+1)])
                 running_avg_score = np.mean(agent[1][max(0, len(agent[1])-10):(len(agent[1])+1)])
-                print(agent[0].name , '-', 'Episode:', len(agent[1]),'Score: %.2f' % score,' Running average: %.2f' %running_avg_score)
-                #print(agent[0].example_memory.num_episodes, "|", agent[0].example_memory.episode_counter)
-
+                print(agent[0].name , '-', 'Episode:', len(agent[1]),'Timestep:', i, '/', timeSteps, 'Score: %.2f' % score,' Running average: %.2f' %running_avg_score)
+    
                 score = 0
 
         score = 0
@@ -153,7 +156,7 @@ if __name__ == '__main__':
 
     ddqn_agent.save_model()
     ddqn_agent.memory.save_memory()
-    filename = 'Cartpole-v1_ddqn_100000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.0001.png'
+    filename = 'Cartpole-v1_ddqn_200000ts_Normal_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
 
     
     
