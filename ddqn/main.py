@@ -58,12 +58,6 @@ def plotLearning(x, scores, epsilons, x1, example_scores, example_epsilsons, fil
 
     plt.savefig(filename)
 
-
-def isLast(agent, index):
-    return agent.memory.terminal_memory[index] == 0
-
-
-
 if __name__ == '__main__':
     env = gym.make('CartPole-v1')
     
