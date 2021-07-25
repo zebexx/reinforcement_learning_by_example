@@ -1,9 +1,10 @@
 
 from tensorflow.keras.layers import Dense, Activation
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential, load_model, save_model, Model
 from tensorflow.keras.optimizers import Adam
 
 import numpy as np
+
 
 class ReplayBuffer(object):
     def __init__(self, max_size, input_shape, n_actions, discrete=False):
@@ -150,11 +151,15 @@ class Example_Buffer(object):
 
             
 
-#test = Example_Buffer("example_data/CartPole-v1")
-#print(test.num_episodes)
+
+
+
+
 
 def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
+
     
+
     model = Sequential([
                 Dense(fc1_dims, input_shape=(input_dims,)),
                 Activation('relu'),
@@ -163,6 +168,8 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
                 Dense(n_actions)])
 
     model.compile(optimizer=Adam(learning_rate=lr), loss='mse')
+
+    
 
     return model
 
