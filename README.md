@@ -19,8 +19,8 @@ Work carried out for CSC 8099 MSc Project & Dissertation as part of MSc Computer
 ------------
 Run `python ddqn/main.py`
 
-Progress will be printed in console.
-Once finished the environment histroy will be saved in `history`
+Progress will be printed to the console.
+Once finished the environment history will be saved in `history`
 Graph data will be saved in `graphData`
 A graph will be generated displaying the learning curve of the agents trained in the main directory.
 
