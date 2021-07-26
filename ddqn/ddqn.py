@@ -198,6 +198,8 @@ class DDQNAgent(object):
         
         self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
 
+        self.learning_counter = 0
+
         
         
 
@@ -209,25 +211,26 @@ class DDQNAgent(object):
         rand = np.random.random()
         if rand < self.epsilon:
             action = np.random.choice(self.action_space)
+            
         else:
-            actions = self.q_eval.predict(state)
+            actions = self.q_eval.predict(state) #add use_multiprocessing=True
             action = np.argmax(actions)
         #if else for example data
         #function to choose similar states
         return action
 
     def learn(self):
-        learning_counter = 0
-        if self.memory.mem_counter > self.batch_size and learning_counter % 4 == 0:
+        
+        if self.memory.mem_counter > self.batch_size and self.learning_counter % 4 == 0:
             state, action, reward, new_state, done = \
                                           self.memory.sample_buffer(self.batch_size)
 
             action_values = np.array(self.action_space, dtype=np.int8)
             action_indices = np.dot(action, action_values)
 
-            q_next = self.q_target.predict(new_state)
-            q_eval = self.q_eval.predict(new_state)
-            q_pred = self.q_eval.predict(state)
+            q_next = self.q_target.predict(new_state)#add use_multiprocessing=True
+            q_eval = self.q_eval.predict(new_state)#add use_multiprocessing=True
+            q_pred = self.q_eval.predict(state)#add use_multiprocessing=True
 
             max_actions = np.argmax(q_eval, axis=1)
 
@@ -238,7 +241,7 @@ class DDQNAgent(object):
             q_target[batch_index, action_indices] = reward + \
                     self.gamma*q_next[batch_index, max_actions.astype(int)]*done
 
-            _ = self.q_eval.fit(state, q_target, verbose=0)
+            _ = self.q_eval.fit(state, q_target, verbose=0)#add use_multiprocessing=True
 
             self.epsilon = self.epsilon * self.epsilon_dec if self.epsilon > \
                            self.epsilon_min else self.epsilon_min
