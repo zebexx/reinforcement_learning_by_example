@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, lines=None):
@@ -46,3 +47,12 @@ def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, l
             plt.axvline(x=line)
 
     plt.savefig(filename)
+
+def saveGraphData(agents, directory):
+    i = 0
+    while os.path.exists("{}/{}/scores.csv".format(directory, i)):
+        i +=1
+    for agent in agents:
+        np.savetxt("{}/{}/scores.csv".format(directory, i), agent[1], delimiter=",")
+        np.savetxt("{}/{}/timeSteps.csv".format(directory, i), agent[2], delimiter=",")
+        np.savetxt("{}/{}/epsilon.csv".format(directory, i), agent[3], delimiter=",")

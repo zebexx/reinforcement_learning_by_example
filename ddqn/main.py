@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from utils import plot
+from utils import saveGraphData
 
 from tf_agents.environments import suite_gym
 
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     memory_size = 1000000
     batch_size = 32
 
-    timeSteps = 150000
+    timeSteps = 200000
 
     env = gym.make('CartPole-v1')
     
@@ -66,9 +67,10 @@ if __name__ == '__main__':
 
     ddqn_agent.save_model()
     ddqn_agent.memory.save_memory()
-    filename = 'Cartpole-v1_ddqn_150000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
 
-    
+    saveGraphData(agents, "graphData")
+    filename = 'Cartpole-v1_ddqn_200000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
+       
     
     
     plot(episode_timestep, ddqn_scores, eps_history, example_episode_timestep, example_ddqn_scores, example_eps_history, filename)
