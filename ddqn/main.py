@@ -29,7 +29,7 @@ if __name__ == '__main__':
     epsilon_end = 0.1
     epsilon_discount_rate = 0.9999
 
-    replace_target = 500
+    replace_target = 1000
 
     memory_size = 1000000
     batch_size = 32
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
 
     saveGraphData(agents, "graphData")
-    filename = 'Cartpole-v1_ddqn_200000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
+    filename = 'Cartpole-v1_ddqn_200000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-1000.png'
        
     
     

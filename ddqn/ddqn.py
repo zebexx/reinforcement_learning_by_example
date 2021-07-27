@@ -213,7 +213,7 @@ class DDQNAgent(object):
             action = np.random.choice(self.action_space)
             
         else:
-            actions = self.q_eval.predict(state) #add use_multiprocessing=True
+            actions = self.q_eval.predict(state, use_multiprocessing=True) #add use_multiprocessing=True
             action = np.argmax(actions)
         #if else for example data
         #function to choose similar states
@@ -228,9 +228,9 @@ class DDQNAgent(object):
             action_values = np.array(self.action_space, dtype=np.int8)
             action_indices = np.dot(action, action_values)
 
-            q_next = self.q_target.predict(new_state)#add use_multiprocessing=True
-            q_eval = self.q_eval.predict(new_state)#add use_multiprocessing=True
-            q_pred = self.q_eval.predict(state)#add use_multiprocessing=True
+            q_next = self.q_target.predict(new_state, use_multiprocessing=True)#add use_multiprocessing=True
+            q_eval = self.q_eval.predict(new_state, use_multiprocessing=True)#add use_multiprocessing=True
+            q_pred = self.q_eval.predict(state, use_multiprocessing=True)#add use_multiprocessing=True
 
             max_actions = np.argmax(q_eval, axis=1)
 
@@ -241,7 +241,7 @@ class DDQNAgent(object):
             q_target[batch_index, action_indices] = reward + \
                     self.gamma*q_next[batch_index, max_actions.astype(int)]*done
 
-            _ = self.q_eval.fit(state, q_target, verbose=0)#add use_multiprocessing=True
+            _ = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)#add use_multiprocessing=True
 
             self.epsilon = self.epsilon * self.epsilon_dec if self.epsilon > \
                            self.epsilon_min else self.epsilon_min

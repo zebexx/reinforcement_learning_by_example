@@ -49,9 +49,12 @@ def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, l
     plt.savefig(filename)
 
 def saveGraphData(agents, directory):
+    if not os.path.exists(directory):
+        os.mkdir(directory)
     i = 0
-    while os.path.exists("{}/{}/scores.csv".format(directory, i)):
+    while os.path.exists("{}/{}".format(directory, i)):
         i +=1
+    os.mkdir("{}/{}".format(directory, i))
     for agent in agents:
         np.savetxt("{}/{}/scores.csv".format(directory, i), agent[1], delimiter=",")
         np.savetxt("{}/{}/timeSteps.csv".format(directory, i), agent[2], delimiter=",")
