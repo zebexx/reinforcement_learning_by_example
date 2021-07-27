@@ -70,16 +70,16 @@ class Example_Buffer(object):
 
         
         
-        episode_indexes = []
+        episode_indexes = [0]
         
         for i in range(len(self.terminal_memory)):
-            if self.terminal_memory[i] == 0 and i != len(self.terminal_memory)-1:
+            if self.terminal_memory[i] == 0:# and i != len(self.terminal_memory)-1:
                 episode_indexes.append(i+1)
             
         
         self.episode_indexes = episode_indexes
         
-        
+        print(self.example_parser())
 
         if episode_choice == "all":
             episode_choice = []
@@ -118,8 +118,6 @@ class Example_Buffer(object):
         self.num_episodes = len(episode_indexes1)+1
         
 
-        
-
     def sample_example(self):
 
         states = self.state_memory[self.mem_counter]
@@ -148,10 +146,17 @@ class Example_Buffer(object):
             self.episode_counter += 1
 
         return actions, states_, rewards, terminal, {}
+    
+    def example_parser(self):
+        episode_scores = []
+        for i in range(1, len(self.episode_indexes)):
+            episode_scores.append(np.sum(self.reward_memory[range(self.episode_indexes[i-1], self.episode_indexes[i])]))
+
+        return episode_scores
 
             
 
-
+test = Example_Buffer(location="example_data/CartPole-v1", discrete=True)
 
 
 

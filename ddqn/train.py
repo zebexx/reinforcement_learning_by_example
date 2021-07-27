@@ -44,7 +44,8 @@ def train(agent, timeSteps, env):
 
             avg_score = np.mean(agent[1][max(0, len(agent[1])-100):(len(agent[1])+1)])
             running_avg_score = np.mean(agent[1][max(0, len(agent[1])-10):(len(agent[1])+1)])
-            print(agent[0].name , '-', 'Episode:', len(agent[1]),'Timestep:', i, '/', timeSteps, 'Score: %.2f' % score,' Running average: %.2f' %running_avg_score)
+            average_score = np.mean(agent[1][max(0, len(agent[1])-100):(len(agent[1])+1)])
+            print(agent[0].name , '-', 'Episode:', len(agent[1]),'Timestep:', i, '/', timeSteps, 'Score: %.2f' % score,' Running average: %.2f' %running_avg_score, 'Average: %.2f' %average_score)
 
             score = 0
 
