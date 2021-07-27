@@ -57,8 +57,8 @@ class ReplayBuffer(object):
 
     
 class Example_Buffer(object):
-    def __init__(self, location, episode_choice="all", discrete=False, ):
-        self.episode_choice = episode_choice
+    def __init__(self, location, episode_range, discrete=False):
+        self.episode_range = episode_range
         self.discrete = discrete
         self.dtype = np.int8 if self.discrete else np.float32
 
@@ -70,30 +70,33 @@ class Example_Buffer(object):
 
         
         
-        episode_indexes = [0]
+        self.episode_indexes = [0]
         
         for i in range(len(self.terminal_memory)):
-            if self.terminal_memory[i] == 0:# and i != len(self.terminal_memory)-1:
-                episode_indexes.append(i+1)
+            if self.terminal_memory[i] == 0:
+                self.episode_indexes.append(i+1)
+            
             
         
-        self.episode_indexes = episode_indexes
+        self.episode_scores = self.example_parser()
         
-        print(self.example_parser())
 
-        if episode_choice == "all":
-            episode_choice = []
-            for i in range(len(episode_indexes)):
-                episode_choice.append(i)
-        else:
-            print("Loading {} Episodes...".format(len(self.episode_choice)))
+        self.episode_choice = []
+        for i in range(len(self.episode_scores)):
+            if self.episode_scores[i] >= self.episode_range[0] and self.episode_scores[i] <= self.episode_range[1]:
+                self.episode_choice.append(i)
+        print(len(self.episode_choice))
+
         
         
-        episode_state_memory = np.split(self.state_memory, self.episode_indexes)
-        episode_action_memory = np.split(self.action_memory, self.episode_indexes)
-        episode_reward_memory= np.split(self.reward_memory, self.episode_indexes)
-        episode_next_state_memory= np.split(self.next_state_memory, self.episode_indexes)
-        episode_terminal_memory = np.split(self.terminal_memory, self.episode_indexes)
+        print("Loading {} Episodes...".format(len(self.episode_choice)))
+        
+        
+        episode_state_memory = np.split(self.state_memory, self.episode_indexes[1:])
+        episode_action_memory = np.split(self.action_memory, self.episode_indexes[1:])
+        episode_reward_memory= np.split(self.reward_memory, self.episode_indexes[1:])
+        episode_next_state_memory= np.split(self.next_state_memory, self.episode_indexes[1:])
+        episode_terminal_memory = np.split(self.terminal_memory, self.episode_indexes[1:])
 
         self.state_memory = np.concatenate([episode_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
         self.action_memory = np.concatenate([episode_action_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
@@ -101,23 +104,21 @@ class Example_Buffer(object):
         self.state_memory = np.concatenate([episode_next_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
         self.terminal_memory = np.concatenate([episode_terminal_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
 
-        
-
         self.num_examples = len(self.action_memory)
         self.mem_counter = 0
         self.episode_counter = 0
 
-        episode_indexes1 = []
+        self.episode_indexes = []
 
         for i in range(len(self.terminal_memory)):
-            if self.terminal_memory[i] == 0 and i != len(self.terminal_memory)-1:
-                episode_indexes1.append(i+1)
+            if self.terminal_memory[i] == 0:
+                self.episode_indexes.append(i+1)
+           
             
-        
-        self.episode_indexes = episode_indexes1
-        self.num_episodes = len(episode_indexes1)+1
-        
+        self.num_episodes = len(self.episode_indexes)+1
 
+        self.episode_scores = self.example_parser()
+        
     def sample_example(self):
 
         states = self.state_memory[self.mem_counter]
@@ -138,11 +139,11 @@ class Example_Buffer(object):
         states_ = self.next_state_memory[self.mem_counter]
         rewards = self.reward_memory[self.mem_counter]
         terminal = self.terminal_memory[self.mem_counter]
-        #print(self.mem_counter)
+        
 
         self.mem_counter += 1
         if terminal == 0:
-            #print("done")
+            
             self.episode_counter += 1
 
         return actions, states_, rewards, terminal, {}
@@ -153,11 +154,15 @@ class Example_Buffer(object):
             episode_scores.append(np.sum(self.reward_memory[range(self.episode_indexes[i-1], self.episode_indexes[i])]))
 
         return episode_scores
+    
+    def choice_score_range(self, range, episode_scores):
+        episode_choice = []
+        for i in range(len(episode_scores)):
+            if episode_scores[i] >= range[0] and episode_scores[i] <= range[1]:
+                episode_choice.append(i)
+        return episode_choice
 
-            
-
-test = Example_Buffer(location="example_data/CartPole-v1", discrete=True)
-
+ 
 
 
 
@@ -181,7 +186,7 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 
 class DDQNAgent(object):
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
+                 input_dims, episode_range=[0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
                  mem_size=1000000, fname='ddqn_model.h5', replace_target=500, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
@@ -195,7 +200,7 @@ class DDQNAgent(object):
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions,discrete=True)
         self.use_examples = use_examples
         if self.use_examples:
-            self.example_memory = Example_Buffer(location=example_location, discrete=True, episode_choice=[420,421,422,423,424,425,426,427,428,429])
+            self.example_memory = Example_Buffer(location=example_location, discrete=True, episode_range=episode_range)
             self.name = "Example Agent"
         else:
             self.name = "Normal Agent"

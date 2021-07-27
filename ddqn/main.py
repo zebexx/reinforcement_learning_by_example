@@ -35,6 +35,8 @@ if __name__ == '__main__':
 
     timeSteps = 200000
 
+    example_episode_range = [500,500]
+
     env = gym.make('CartPole-v1')
     
 
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     
     ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=epsilon_start, batch_size=batch_size, input_dims=4, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
 
-    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=1, batch_size=batch_size, input_dims=4, use_examples=True, example_location="example_data/CartPole-v1", epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=1, batch_size=batch_size, input_dims=4, use_examples=True, episode_range=example_episode_range, example_location="example_data/CartPole-v1", epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
