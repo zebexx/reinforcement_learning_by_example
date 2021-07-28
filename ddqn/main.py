@@ -35,7 +35,8 @@ if __name__ == '__main__':
 
     timeSteps = 200000
 
-    example_episode_range = [500,500]
+    #[lowerbound, upperbound, max quantity]
+    example_episode_range = [0,50,50]
 
     env = gym.make('CartPole-v1')
     
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
 
     saveGraphData(agents, "graphData")
-    filename = 'Cartpole-v1_ddqn_200000ts_Normal_10-500_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
+    filename = 'Cartpole-v1_ddqn_200000ts_Normal_[500-500]_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
        
     
     

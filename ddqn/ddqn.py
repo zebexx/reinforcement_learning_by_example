@@ -85,7 +85,9 @@ class Example_Buffer(object):
         for i in range(len(self.episode_scores)):
             if self.episode_scores[i] >= self.episode_range[0] and self.episode_scores[i] <= self.episode_range[1]:
                 self.episode_choice.append(i)
-        print(len(self.episode_choice))
+            if len(self.episode_choice) >= self.episode_range[2]:
+                break
+        
 
         
         
@@ -186,7 +188,7 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 
 class DDQNAgent(object):
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, episode_range=[0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
+                 input_dims, episode_range=[0,0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
                  mem_size=1000000, fname='ddqn_model.h5', replace_target=500, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
