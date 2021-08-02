@@ -56,14 +56,16 @@ if __name__ == '__main__':
     ddqn_scores = []
     episode_timestep = []
     eps_history = []
+    name = "Normal"
 
     example_ddqn_scores = []
     example_episode_timestep = []
     example_eps_history = []
+    example_name = "Example"
     
     agents = []
-    agents.append([ddqn_agent_example, example_ddqn_scores, example_episode_timestep, example_eps_history])
-    agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history])
+    agents.append([ddqn_agent_example, example_ddqn_scores, example_episode_timestep, example_eps_history, example_name])
+    agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history, name])
 
 
     
@@ -75,8 +77,8 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
 
     saveGraphData(agents, "graphData")
-    filename = "{}_ddqn_{}ts_Normal_{}_bs-{}_bu-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}.png".format(env_name, timeSteps, example_episode_range, batch_size, learn_from_batch, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
-       
+    name = "{}_ddqn_{}ts_Normal_{}_bs-{}_bu-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, learn_from_batch, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
+    filename = "{}.png".format(name) 
     
     
-    plot(episode_timestep, ddqn_scores, eps_history, example_episode_timestep, example_ddqn_scores, example_eps_history, filename)
+    plot(agents, filename)
