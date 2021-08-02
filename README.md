@@ -22,7 +22,8 @@ Run `python ddqn/main.py`
 Progress will be printed to the console.
 Once finished the environment history will be saved in `history`
 Graph data will be saved in `graphData`
-A graph will be generated displaying the learning curve of the agents trained in the main directory.
+A graph will be generated displaying the learning curve and epsilon of the agents trained in the main directory.
+The graph file name is generated from Hyperparameters
 
 Hyperparameters can be changed in `main.py`
 
