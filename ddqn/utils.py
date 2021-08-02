@@ -4,6 +4,8 @@ import os
 
 
 def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, lines=None):
+
+
     fig=plt.figure()
     ax=fig.add_subplot(111, label="1")
     ax2=fig.add_subplot(111, label="2", frame_on=False)
@@ -17,21 +19,18 @@ def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, l
     ax.tick_params(axis='x', colors="C0")
     ax.tick_params(axis='y', colors="C0")
 
-    N = len(scores)
-    running_avg = np.empty(N)
-    for t in range(N):
-	    running_avg[t] = np.mean(scores[max(0, t-10):(t+1)])
+    
+    running_avg = average_over(scores, 10)
+    avg = average_over(scores, 100)
 
-    N = len(example_scores)
-    example_running_avg = np.empty(N)
-    for t in range(N):
-	    example_running_avg[t] = np.mean(example_scores[max(0, t-10):(t+1)])
+    example_running_avg = average_over(example_scores, 10)
+    example_avg = average_over(example_scores, 100)
 
-    ax2.plot(x, running_avg, color="r", label="Normal")
-    #ax2.plot(x, scores, color="lightcoral", linewidth=0.5)
+    ax2.plot(x, running_avg, color="r", label="Normal", linewidth=0.5)
+    ax2.plot(x, avg, color="lightcoral")
 
-    ax2.plot(x1, example_running_avg, color="b", label="Example")
-    #ax2.plot(x1, example_scores, color="cornflowerblue", linewidth=0.5)
+    ax2.plot(x1, example_running_avg, color="b", label="Example", linewidth=0.5)
+    ax2.plot(x1, example_avg, color="cornflowerblue")
 
     ax2.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01), ncol=2,
             borderaxespad=0, frameon=False, fontsize='x-small')
@@ -48,6 +47,14 @@ def plot(x, scores, epsilons, x1, example_scores, example_epsilsons, filename, l
 
     plt.savefig(filename)
 
+def average_over(data, avg_range):
+        N = len(data)
+        avg = np.empty(N)
+        for t in range(N):
+	        avg[t] = np.mean(data[max(0, t-avg_range):(t+1)])
+        return avg
+
+    
 def saveGraphData(agents, directory):
     if not os.path.exists(directory):
         os.mkdir(directory)
@@ -59,3 +66,6 @@ def saveGraphData(agents, directory):
         np.savetxt("{}/{}/scores.csv".format(directory, i), agent[1], delimiter=",")
         np.savetxt("{}/{}/timeSteps.csv".format(directory, i), agent[2], delimiter=",")
         np.savetxt("{}/{}/epsilon.csv".format(directory, i), agent[3], delimiter=",")
+
+#TODO: function for generating graph and file name with hyperparameters, example settings and env details
+#TODO: function for producing graphs from saved graphData

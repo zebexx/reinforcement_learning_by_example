@@ -29,23 +29,27 @@ if __name__ == '__main__':
     epsilon_discount_rate = 0.9999
 
     replace_target = 500
-
+ 
     memory_size = 1000000
     batch_size = 32
+    learn_from_batch = 4
+    #TODO add learn_from_batch to ddqn fields
 
-    timeSteps = 200000
-
+    timeSteps = 400000
+    example_data_location = "example_data/MountainCar-v0"
     #[lowerbound, upperbound, max quantity]
-    example_episode_range = [0,50,50]
+    example_episode_range = [-170,0,50]
 
-    env = gym.make('CartPole-v1')
+    env_name = "MountainCar-v0"
+    
     
 
     #Initialising agents
-    
-    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=epsilon_start, batch_size=batch_size, input_dims=4, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    env = gym.make(env_name)
 
-    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, epsilon=1, batch_size=batch_size, input_dims=4, use_examples=True, episode_range=example_episode_range, example_location="example_data/CartPole-v1", epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+
+    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=1, batch_size=batch_size, use_examples=True, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
@@ -71,7 +75,7 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
 
     saveGraphData(agents, "graphData")
-    filename = 'Cartpole-v1_ddqn_200000ts_Normal_[500-500]_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png'
+    filename = "{}_ddqn_{}ts_Normal_{}_bs-{}_bu-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}.png".format(env_name, timeSteps, example_episode_range, batch_size, learn_from_batch, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
        
     
     
