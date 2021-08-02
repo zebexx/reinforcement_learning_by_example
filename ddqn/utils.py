@@ -57,10 +57,14 @@ def saveGraphData(agents, directory, name):
     os.mkdir("{}/{}".format(directory, tmpname))
     j = 0
     for agent in agents:
-        np.savetxt("{}/{}/{}scores.csv".format(directory, tmpname, "Agent{}_".format(j)), agent[1], delimiter=",")
-        np.savetxt("{}/{}/{}timeSteps.csv".format(directory, tmpname,"Agent{}_".format(j)), agent[2], delimiter=",")
-        np.savetxt("{}/{}/{}epsilon.csv".format(directory, tmpname, "Agent{}_".format(j)), agent[3], delimiter=",")
-        j +=1
+        folder = "Agent{}".format(j)
+        os.mkdir("{}/{}/{}".format(directory, tmpname, folder))
+
+        np.savetxt("{}/{}/{}/scores.csv".format(directory, tmpname, folder), agent[1], delimiter=",")
+        np.savetxt("{}/{}/{}/timeSteps.csv".format(directory, tmpname, folder), agent[2], delimiter=",")
+        np.savetxt("{}/{}/{}/epsilon.csv".format(directory, tmpname, folder), agent[3], delimiter=",")
+        j+=1
+        
 
 
 #TODO: function for producing graphs from saved graphData
