@@ -233,9 +233,10 @@ class DDQNAgent(object):
 
     def learn(self):
         
+            
         if self.memory.mem_counter > self.batch_size and self.learning_counter % 4 == 0:
             state, action, reward, new_state, done = \
-                                          self.memory.sample_buffer(self.batch_size)
+                                        self.memory.sample_buffer(self.batch_size)
 
             action_values = np.array(self.action_space, dtype=np.int8)
             action_indices = np.dot(action, action_values)
@@ -256,11 +257,33 @@ class DDQNAgent(object):
             _ = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
 
             self.epsilon = self.epsilon * self.epsilon_dec if self.epsilon > \
-                           self.epsilon_min else self.epsilon_min
+                        self.epsilon_min else self.epsilon_min
             if self.memory.mem_counter % self.replace_target == 0:
                 self.update_network_parameters()
 
+    def prime(self):
+        state, action, reward, new_state, done = self.example_memory.sample_example(self.batch_size)
+
+        action_values = np.array(self.action_space, dtype=np.int8)
+        action_indices = np.dot(action, action_values)
+
+        q_next = self.q_target.predict(new_state, use_multiprocessing=True)
+        q_eval = self.q_eval.predict(new_state, use_multiprocessing=True)
+        q_pred = self.q_eval.predict(state, use_multiprocessing=True)
+
+        max_actions = np.argmax(q_eval, axis=1)
+
+        q_target = q_pred
+
+        batch_index = np.arange(self.batch_size, dtype=np.int32)
+
+        q_target[batch_index, action_indices] = reward + self.gamma*q_next[batch_index, max_actions.astype(int)]*done
+
+        self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
+        if self.example_memory.mem_counter % self.replace_target == 0:
+                self.update_network_parameters()
         
+
 
     def update_network_parameters(self):
         for i in range(len(self.q_target.layers)):
