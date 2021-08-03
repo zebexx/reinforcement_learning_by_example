@@ -7,34 +7,19 @@ def plot(agents, filename, lines=None):
 
 
     fig=plt.figure()
-    ax=fig.add_subplot(111, label="1")
-    ax2=fig.add_subplot(111, label="2", frame_on=False)
+    
     for agent in agents:
-
-        ax.plot(agent[2], agent[3], color="m", linewidth=0.5)
-        running_avg = average_over(agent[1], 10)
         avg = average_over(agent[1], 100)
-        ax2.plot(agent[2], running_avg, label="{} 10 ep average".format(agent[4]), linewidth=0.5)
-        ax2.plot(agent[2], avg, label="{} 100 ep average".format(agent[4]))
+        plt.plot(agent[2], avg, label="{}".format(agent[4]))
     
     
-    ax.set_xlabel("Timesteps", color="C0")
-    ax.set_ylabel("Epsilon", color="C0")
-    ax.tick_params(axis='x', colors="C0")
-    ax.tick_params(axis='y', colors="C0")
+    plt.xlabel("Timesteps", color="C0")
+    plt.ylabel("Score", color="C0")
+    plt.tick_params(axis='x', colors="C0")
+    plt.tick_params(axis='y', colors="C0")
 
-    ax2.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01), ncol=2,
+    plt.legend(loc='lower left', bbox_to_anchor= (0.0, 1.01), ncol=2,
             borderaxespad=0, frameon=False, fontsize='x-small')
-
-    ax2.axes.get_xaxis().set_visible(False)
-    ax2.yaxis.tick_right()
-    ax2.set_ylabel('Score', color="C1")
-    ax2.yaxis.set_label_position('right')
-    ax2.tick_params(axis='y', colors="C1")
-
-    if lines is not None:
-        for line in lines:
-            plt.axvline(x=line)
 
     plt.savefig(filename)
 
