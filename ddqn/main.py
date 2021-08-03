@@ -21,24 +21,27 @@ if __name__ == '__main__':
     
 
     ### HYPERPARAMETERS ###
-    alpha = 0.00025
+    alpha = 0.001
     gamma = 0.99
 
     epsilon_start = 1
-    epsilon_end = 0.1
-    epsilon_discount_rate = 0.9999
+    epsilon_end = 0.01
+    epsilon_discount_rate = 0.999
 
     replace_target = 500
  
     memory_size = 1000000
     batch_size = 32
     learn_from_batch = 4
-    #TODO add learn_from_batch to ddqn fields
+    
 
     timeSteps = 400000
+
+
     example_data_location = "example_data/MountainCar-v0"
     #[lowerbound, upperbound, max quantity]
-    example_episode_range = [-170,0,50]
+    example_episode_range = [-110,0,200]
+    primesteps = 100000
 
     env_name = "MountainCar-v0"
     
@@ -47,16 +50,16 @@ if __name__ == '__main__':
     #Initialising agents
     env = gym.make(env_name)
 
-    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    #ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
 
-    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=1, batch_size=batch_size, use_examples=True, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=True, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
-    ddqn_scores = []
-    episode_timestep = []
-    eps_history = []
-    name = "Normal"
+    #ddqn_scores = []
+    #episode_timestep = []
+    #eps_history = []
+    #name = "Normal"
 
     example_ddqn_scores = []
     example_episode_timestep = []
@@ -65,7 +68,7 @@ if __name__ == '__main__':
     
     agents = []
     agents.append([ddqn_agent_example, example_ddqn_scores, example_episode_timestep, example_eps_history, example_name])
-    agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history, name])
+    #agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history, name])
 
 
     
@@ -73,11 +76,14 @@ if __name__ == '__main__':
         train(agent, timeSteps, env)
     
 
-    ddqn_agent.save_model()
-    ddqn_agent.memory.save_memory()
+    #ddqn_agent.save_model()
+    #ddqn_agent.memory.save_memory()
 
-    saveGraphData(agents, "graphData")
+    
     name = "{}_ddqn_{}ts_Normal_{}_bs-{}_bu-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, learn_from_batch, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
+    
+    saveGraphData(agents, "graphData", name)
+    
     filename = "{}.png".format(name) 
     
     

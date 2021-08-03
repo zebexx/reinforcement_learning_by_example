@@ -1,41 +1,35 @@
 import numpy as np
 import time
+from IPython.display import clear_output
 
 def train(agent, timeSteps, env):
     score = 0
     done = True
     #Training loop
+    finished_priming = False
+    if agent[0].use_examples and finished_priming == False:
+        print("Priming")
+        for i in range(agent[0].primesteps):
+            agent[0].prime()
+            if i % 100 == 0:
+                print("Priming: {}/{}".format(i,agent[0].primesteps))
+        print("Finished priming")
+        finished_priming = True
+            
+    
     for i in range(timeSteps):
         
-        if agent[0].use_examples and agent[0].example_memory.mem_counter+1 <= agent[0].example_memory.num_examples and agent[0].epsilon <= agent[0].epsilon_min :
+        if done:
+            observation = env.reset()
             
-            if agent[0].example_memory.mem_counter == 0:
-                score =0
-            
-            if done:
-                observation = agent[0].example_memory.example_reset()
-
-            
-            action, observation_, reward, xdone, info = agent[0].example_memory.example_step()
-            done = not xdone
-            
-            score+=reward
-            agent[0].remember(observation, action, reward, observation_, int(done))
-            observation = observation_
-            agent[0].learn()
-        else:
-            
-            if done:
-                observation = env.reset()
-                
-            action = agent[0].choose_action(observation)
-            
-            observation_, reward, done, info = env.step(action)
-            score += reward
-            agent[0].remember(observation, action, reward, observation_, int(done))
-            observation = observation_
-            agent[0].learn()
+        action = agent[0].choose_action(observation)
         
+        observation_, reward, done, info = env.step(action)
+        score += reward
+        agent[0].remember(observation, action, reward, observation_, int(done))
+        observation = observation_
+        agent[0].learn()
+    
         if done: 
             agent[1].append(score)
             agent[2].append(i+1)

@@ -107,7 +107,7 @@ class Example_Buffer(object):
         self.terminal_memory = np.concatenate([episode_terminal_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
 
         self.num_examples = len(self.action_memory)
-        self.mem_counter = 0
+        self.mem_counter = len(self.action_memory)
         self.episode_counter = 0
 
         self.episode_indexes = []
@@ -121,15 +121,16 @@ class Example_Buffer(object):
 
         self.episode_scores = self.example_parser()
         
-    def sample_example(self):
+    def sample_example(self, batch_size):
 
-        states = self.state_memory[self.mem_counter]
-        actions = self.action_memory[self.mem_counter]
-        rewards = self.reward_memory[self.mem_counter]
-        states_ = self.next_state_memory[self.mem_counter]
-        terminal = self.terminal_memory[self.mem_counter]
+        max_mem = self.mem_counter
+        batch = np.random.choice(max_mem, batch_size)
 
-        self.mem_counter += 1
+        states = self.state_memory[batch]
+        actions = self.action_memory[batch]
+        rewards = self.reward_memory[batch]
+        states_ = self.next_state_memory[batch]
+        terminal = self.terminal_memory[batch]
 
         return states, actions, rewards, states_, terminal
 
@@ -185,10 +186,10 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 
     return model
 
-
+# Heavily influenced by: https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/ddqn_keras.py
 class DDQNAgent(object):
-    def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, episode_range=[0,0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
+    def __init__(self, alpha, gamma, n_actions, epsilon, batch_size, batch_step,
+                 input_dims, primesteps=0, episode_range=[0,0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
                  mem_size=1000000, fname='ddqn_model.h5', replace_target=500, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
@@ -204,6 +205,7 @@ class DDQNAgent(object):
         if self.use_examples:
             self.example_memory = Example_Buffer(location=example_location, discrete=True, episode_range=episode_range)
             self.name = "Example Agent"
+            self.primesteps = primesteps
         else:
             self.name = "Normal Agent"
         self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
@@ -211,6 +213,7 @@ class DDQNAgent(object):
         self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
 
         self.learning_counter = 0
+        self.batch_step = batch_step
 
         
         
@@ -231,10 +234,8 @@ class DDQNAgent(object):
         #function to choose similar states
         return action
 
-    def learn(self):
-        
-            
-        if self.memory.mem_counter > self.batch_size and self.learning_counter % 4 == 0:
+    def learn(self):          
+        if self.memory.mem_counter > self.batch_size and self.learning_counter % self.batch_step == 0:
             state, action, reward, new_state, done = \
                                         self.memory.sample_buffer(self.batch_size)
 
@@ -262,6 +263,8 @@ class DDQNAgent(object):
                 self.update_network_parameters()
 
     def prime(self):
+        primestep_counter = 0
+
         state, action, reward, new_state, done = self.example_memory.sample_example(self.batch_size)
 
         action_values = np.array(self.action_space, dtype=np.int8)
@@ -279,9 +282,10 @@ class DDQNAgent(object):
 
         q_target[batch_index, action_indices] = reward + self.gamma*q_next[batch_index, max_actions.astype(int)]*done
 
-        self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
-        if self.example_memory.mem_counter % self.replace_target == 0:
+        _ = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
+        if primestep_counter % self.replace_target == 0:
                 self.update_network_parameters()
+        primestep_counter += 1
         
 
 
