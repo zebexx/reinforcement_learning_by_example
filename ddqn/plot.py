@@ -18,6 +18,6 @@ def plotFromData(folder, graphName):
 
         
 
-folder = "graphData/12"
+folder = "graphData\MountainCar-v0_ddqn_400000ts_Normal_[-110, 0, 200]_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500"
 filename = "Test_graph.png"
 plotFromData(folder, filename)

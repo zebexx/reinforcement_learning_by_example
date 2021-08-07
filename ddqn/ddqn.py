@@ -22,7 +22,7 @@ class ReplayBuffer(object):
         index = self.mem_counter % self.mem_size
         self.state_memory[index] = state
         self.next_state_memory[index] = state_
-        # store one hot encoding of actions, if appropriate
+        
         if self.discrete:
             actions = np.zeros(self.action_memory.shape[1])
             actions[action] = 1.0
@@ -167,28 +167,9 @@ class Example_Buffer(object):
 
  
 
-
-
-def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
-
-    
-
-    model = Sequential([
-                Dense(fc1_dims, input_shape=(input_dims,)),
-                Activation('relu'),
-                Dense(fc2_dims),
-                Activation('relu'),
-                Dense(n_actions)])
-
-    model.compile(optimizer=Adam(learning_rate=lr), loss='mse')
-
-    
-
-    return model
-
 # Heavily influenced by: https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/ddqn_keras.py
 class DDQNAgent(object):
-    def __init__(self, alpha, gamma, n_actions, epsilon, batch_size, batch_step,
+    def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
                  input_dims, primesteps=0, episode_range=[0,0,0], example_location=None, epsilon_dec=0.9999,  epsilon_end=0.0001,
                  mem_size=1000000, fname='ddqn_model.h5', replace_target=500, use_examples=False):
         self.action_space = [i for i in range(n_actions)]
@@ -208,15 +189,28 @@ class DDQNAgent(object):
             self.primesteps = primesteps
         else:
             self.name = "Normal Agent"
-        self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
+        self.q_eval = self.build_dqn(alpha, n_actions, input_dims, 256, 256)
         
-        self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
+        self.q_target = self.build_dqn(alpha, n_actions, input_dims, 256, 256)
 
         self.learning_counter = 0
-        self.batch_step = batch_step
+        
+        self.primestep_counter = 0
 
         
         
+    def build_dqn(self, lr, n_actions, input_dims, fc1_dims, fc2_dims):
+
+        model = Sequential([
+                    Dense(fc1_dims, input_shape=(input_dims,)),
+                    Activation('relu'),
+                    Dense(fc2_dims),
+                    Activation('relu'),
+                    Dense(n_actions)])
+
+        model.compile(optimizer=Adam(learning_rate=lr), loss='mse')
+
+        return model
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -235,7 +229,7 @@ class DDQNAgent(object):
         return action
 
     def learn(self):          
-        if self.memory.mem_counter > self.batch_size and self.learning_counter % self.batch_step == 0:
+        if self.memory.mem_counter > self.batch_size:
             state, action, reward, new_state, done = \
                                         self.memory.sample_buffer(self.batch_size)
 
@@ -255,17 +249,20 @@ class DDQNAgent(object):
             q_target[batch_index, action_indices] = reward + \
                     self.gamma*q_next[batch_index, max_actions.astype(int)]*done
 
-            _ = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
+            loss = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
 
             self.epsilon = self.epsilon * self.epsilon_dec if self.epsilon > \
                         self.epsilon_min else self.epsilon_min
             if self.memory.mem_counter % self.replace_target == 0:
                 self.update_network_parameters()
+            
+            return loss
 
     def prime(self):
-        primestep_counter = 0
+        
 
         state, action, reward, new_state, done = self.example_memory.sample_example(self.batch_size)
+
 
         action_values = np.array(self.action_space, dtype=np.int8)
         action_indices = np.dot(action, action_values)
@@ -282,10 +279,13 @@ class DDQNAgent(object):
 
         q_target[batch_index, action_indices] = reward + self.gamma*q_next[batch_index, max_actions.astype(int)]*done
 
-        _ = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
-        if primestep_counter % self.replace_target == 0:
+        loss = self.q_eval.fit(state, q_target, verbose=0, use_multiprocessing=True)
+
+        if self.primestep_counter % self.replace_target == 0:
                 self.update_network_parameters()
-        primestep_counter += 1
+        self.primestep_counter += 1
+
+        return loss
         
 
 

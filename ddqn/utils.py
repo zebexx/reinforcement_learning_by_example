@@ -38,7 +38,7 @@ def saveGraphData(agents, directory, name):
     i = 0
     while os.path.exists("{}/{}".format(directory, tmpname)):
         i +=1
-        tmpname = name + "_"+ i
+        tmpname = "{}_{}".format(name, i)
     os.mkdir("{}/{}".format(directory, tmpname))
     j = 0
     for agent in agents:

@@ -10,9 +10,13 @@ def train(agent, timeSteps, env):
     if agent[0].use_examples and finished_priming == False:
         print("Priming")
         for i in range(agent[0].primesteps):
-            agent[0].prime()
+            history = agent[0].prime()
+            
+            loss = history.history['loss']
+            
+
             if i % 100 == 0:
-                print("Priming: {}/{}".format(i,agent[0].primesteps))
+                print("Priming: {}/{}  Loss:{}".format(i,agent[0].primesteps, loss))
         print("Finished priming")
         finished_priming = True
             

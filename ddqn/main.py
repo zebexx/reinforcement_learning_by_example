@@ -32,7 +32,6 @@ if __name__ == '__main__':
  
     memory_size = 1000000
     batch_size = 32
-    learn_from_batch = 4
     
 
     timeSteps = 400000
@@ -40,19 +39,19 @@ if __name__ == '__main__':
 
     example_data_location = "example_data/MountainCar-v0"
     #[lowerbound, upperbound, max quantity]
-    example_episode_range = [-110,0,200]
+    example_episode_range = [0,20,50]
     primesteps = 100000
 
-    env_name = "MountainCar-v0"
+    env_name = "CartPole-v0"
     
     
 
     #Initialising agents
     env = gym.make(env_name)
 
-    #ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    #ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
 
-    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=3, input_dims=2, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=True, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, use_examples=True, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
@@ -80,7 +79,7 @@ if __name__ == '__main__':
     #ddqn_agent.memory.save_memory()
 
     
-    name = "{}_ddqn_{}ts_Normal_{}_bs-{}_bu-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, learn_from_batch, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
+    name = "{}_ddqn_{}ts_Normal_{}_bs-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
     
     saveGraphData(agents, "graphData", name)
     
