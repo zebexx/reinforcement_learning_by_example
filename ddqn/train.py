@@ -18,6 +18,7 @@ def train(agent, timeSteps, env):
             if i % 100 == 0:
                 print("Priming: {}/{}  Loss:{}".format(i,agent[0].primesteps, loss))
         print("Finished priming")
+        #agent[0].replay_add()
         finished_priming = True
             
     

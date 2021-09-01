@@ -24,7 +24,7 @@ if __name__ == '__main__':
     alpha = 0.001
     gamma = 0.99
 
-    epsilon_start = 1
+    epsilon_start = 0.01
     epsilon_end = 0.01
     epsilon_discount_rate = 0.999
 
@@ -34,49 +34,41 @@ if __name__ == '__main__':
     batch_size = 32
     
 
-    timeSteps = 400000
+    timeSteps = 200000
 
-
-    example_data_location = "example_data/MountainCar-v0"
+    use_example = True
+    example_data_location = "example_data/CartPole-v1"
     #[lowerbound, upperbound, max quantity]
-    example_episode_range = [0,20,50]
-    primesteps = 100000
+    example_episode_range = [500,500,200]
+    primesteps = 200000
 
-    env_name = "CartPole-v0"
+    env_name = "CartPole-v1"
     
     
 
     #Initialising agents
     env = gym.make(env_name)
 
-    #ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, batch_step=learn_from_batch, use_examples=False, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
-
-    ddqn_agent_example = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, use_examples=True, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, use_examples=use_example, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
-    #ddqn_scores = []
-    #episode_timestep = []
-    #eps_history = []
-    #name = "Normal"
+    ddqn_scores = []
+    episode_timestep = []
+    eps_history = []
 
-    example_ddqn_scores = []
-    example_episode_timestep = []
-    example_eps_history = []
-    example_name = "Example"
+    name = "Primed" if use_example else "Normal"
+
     
     agents = []
-    agents.append([ddqn_agent_example, example_ddqn_scores, example_episode_timestep, example_eps_history, example_name])
-    #agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history, name])
+    agents.append([ddqn_agent, ddqn_scores, episode_timestep, eps_history, name])
 
 
-    
-    for agent in agents:
-        train(agent, timeSteps, env)
+    train(agents[0], timeSteps, env)
     
 
-    #ddqn_agent.save_model()
-    #ddqn_agent.memory.save_memory()
+    ddqn_agent.save_model()
+    ddqn_agent.memory.save_memory()
 
     
     name = "{}_ddqn_{}ts_Normal_{}_bs-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)

@@ -165,6 +165,11 @@ class Example_Buffer(object):
                 episode_choice.append(i)
         return episode_choice
 
+    def replay_add(self, agent):
+        for i in range(len(self.action_memory)):
+            agent.memory.store_transition(self.state_memory[i], self.action_memory[i], self.reward_memory[i], self.next_state_memory[i], self.terminal_memory[i])
+        print("Added prime data to experience replay")
+
  
 
 # Heavily influenced by: https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/ddqn_keras.py
@@ -214,6 +219,11 @@ class DDQNAgent(object):
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
+
+    def replay_add(self):
+        for i in range(len(self.example_memory.action_memory)):
+           self.remember(self.example_memory.state_memory[i], self.example_memory.action_memory[i], self.example_memory.reward_memory[i], self.example_memory.next_state_memory[i], self.example_memory.terminal_memory[i])
+        print("Added prime data to experience replay")
 
     def choose_action(self, state):
         state = state[np.newaxis, :]
