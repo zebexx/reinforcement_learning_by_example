@@ -75,12 +75,12 @@ def state_space_histogram(data, filteredData, graphName):
     plt.savefig(graphName) 
         
 
-folder = "graphData\CartPole-v1_exploration_vs_no_exploration"
-filename = "CartPole-v1_exploration_vs_no_exploration.png"
-#plotFromData(folder, filename)
+folder = "graphData\MountainCar-v0_ddqn_400000ts_Normal_[-110, 0, 200]_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500"
+filename = "MountainCar-v0_ddqn_400000ts_Normal_[-110, 0, 200]_bs-32_bu-4_lr-0.00025_g-0.99_edr-0.9999_em-0.1_rt-500.png"
+plotFromData(folder, filename)
 
-data = Example_Buffer(location="example_data/CartPole-v1", discrete=True, episode_range=[0,500,10000])
-Fdata = Example_Buffer(location="example_data/CartPole-v1", discrete=True, episode_range=[500,500,200])
+#data = Example_Buffer(location="example_data/CartPole-v1", discrete=True, episode_range=[0,500,10000])
+#Fdata = Example_Buffer(location="example_data/CartPole-v1", discrete=True, episode_range=[500,500,200])
 
-state_space_histogram(data.state_memory, Fdata.state_memory, "CartPole-v1_state_space_histogram.png")
+#state_space_histogram(data.state_memory, Fdata.state_memory, "CartPole-v1_state_space_histogram.png")
 

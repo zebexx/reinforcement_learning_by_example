@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     timeSteps = 200000
 
-    use_example = False
+    use_example = True
     example_data_location = "example_data/CartPole-v1"
     #[lowerbound, upperbound, max quantity]
     example_episode_range = [500,500,200]

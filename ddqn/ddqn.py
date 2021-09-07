@@ -103,7 +103,7 @@ class Example_Buffer(object):
         self.state_memory = np.concatenate([episode_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
         self.action_memory = np.concatenate([episode_action_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
         self.reward_memory = np.concatenate([episode_reward_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
-        self.state_memory = np.concatenate([episode_next_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
+        self.next_state_memory = np.concatenate([episode_next_state_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
         self.terminal_memory = np.concatenate([episode_terminal_memory[self.episode_choice[i]] for i in range(len(self.episode_choice))])
 
         self.num_examples = len(self.action_memory)
