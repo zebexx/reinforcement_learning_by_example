@@ -24,8 +24,8 @@ if __name__ == '__main__':
     alpha = 0.001
     gamma = 0.99
 
-    epsilon_start = 0.01
-    epsilon_end = 0.01
+    epsilon_start = 0
+    epsilon_end = 0
     epsilon_discount_rate = 0.999
 
     replace_target = 500
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     timeSteps = 200000
 
-    use_example = True
+    use_example = False
     example_data_location = "example_data/CartPole-v1"
     #[lowerbound, upperbound, max quantity]
     example_episode_range = [500,500,200]
@@ -49,7 +49,8 @@ if __name__ == '__main__':
     #Initialising agents
     env = gym.make(env_name)
 
-    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, use_examples=use_example, primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
+    ddqn_agent = DDQNAgent(alpha=alpha, gamma=gamma, n_actions=2, input_dims=4, epsilon=epsilon_start, batch_size=batch_size, use_examples=use_example, 
+    primesteps=primesteps, episode_range=example_episode_range, example_location=example_data_location, epsilon_dec=epsilon_discount_rate, epsilon_end=epsilon_end, mem_size=memory_size, replace_target=replace_target)
     
     #Initialising agents graphing history
 
@@ -71,7 +72,8 @@ if __name__ == '__main__':
     ddqn_agent.memory.save_memory()
 
     
-    name = "{}_ddqn_{}ts_Normal_{}_bs-{}_lr-{}_g-{}_edr-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, alpha, gamma, epsilon_discount_rate, epsilon_end, replace_target)
+    name = "{}_ddqn_{}ts_Normal_{}_bs-{}_lr-{}_g-{}_edr-{}_es-{}_em-{}_rt-{}".format(env_name, timeSteps, example_episode_range, batch_size, alpha, gamma, epsilon_discount_rate,epsilon_start, epsilon_end, replace_target)\
+         if use_example else "{}_ddqn_{}ts_Normal_bs-{}_lr-{}_g-{}_edr-{}_es-{}_em-{}_rt-{}".format(env_name, timeSteps, batch_size, alpha, gamma, epsilon_discount_rate,epsilon_start, epsilon_end, replace_target)
     
     saveGraphData(agents, "graphData", name)
     

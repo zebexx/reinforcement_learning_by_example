@@ -170,7 +170,22 @@ class Example_Buffer(object):
             agent.memory.store_transition(self.state_memory[i], self.action_memory[i], self.reward_memory[i], self.next_state_memory[i], self.terminal_memory[i])
         print("Added prime data to experience replay")
 
- 
+    def analyse_state_space(self):
+        minMax = []
+        for i in self.state_memory:
+            if len(minMax) == 0:
+                for y in range(len(i)):
+                    minMax.append([i[y], i[y]])
+            for x in range(len(i)):
+                if i[x] < minMax[x][0]:
+                    minMax[x][0] = i[x]
+                elif i[x] > minMax[x][1]:
+                    minMax[x][1] = i[x]
+        
+        return minMax
+                
+
+
 
 # Heavily influenced by: https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/ddqn_keras.py
 class DDQNAgent(object):
@@ -222,7 +237,8 @@ class DDQNAgent(object):
 
     def replay_add(self):
         for i in range(len(self.example_memory.action_memory)):
-           self.remember(self.example_memory.state_memory[i], self.example_memory.action_memory[i], self.example_memory.reward_memory[i], self.example_memory.next_state_memory[i], self.example_memory.terminal_memory[i])
+           self.remember(self.example_memory.state_memory[i], self.example_memory.action_memory[i], self.example_memory.reward_memory[i], \
+            self.example_memory.next_state_memory[i], self.example_memory.terminal_memory[i])
         print("Added prime data to experience replay")
 
     def choose_action(self, state):
@@ -234,8 +250,6 @@ class DDQNAgent(object):
         else:
             actions = self.q_eval.predict(state, use_multiprocessing=True) 
             action = np.argmax(actions)
-        #if else for example data
-        #function to choose similar states
         return action
 
     def learn(self):          
