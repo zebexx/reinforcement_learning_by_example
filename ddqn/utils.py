@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 
-def plot(agents, filename, lines=None):
+def plot(agents, filename):
 
 
     fig=plt.figure()
