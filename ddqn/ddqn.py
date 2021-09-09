@@ -230,6 +230,8 @@ class DDQNAgent(object):
 
         model.compile(optimizer=Adam(learning_rate=lr), loss='mse')
 
+        print(model.summary())
+
         return model
 
     def remember(self, state, action, reward, new_state, done):
